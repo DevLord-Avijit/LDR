@@ -1,0 +1,13 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #0f0f0f;
+  color: #eee;
+}
+.status {
+  margin-bottom: 20px;
+}
+.video img {
+  border: 3px solid #333;
+  border-radius: 10px;
+}

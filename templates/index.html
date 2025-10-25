@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Laser Monitor</title>
+  <style>
+/* ---------------- Body & General ---------------- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0f0f0f;
+    color: #eee;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+h1 {
+    margin: 20px 0;
+    font-size: 2.5em;
+    text-shadow: 0 0 10px #ff0000;
+}
+
+/* ---------------- Status Section ---------------- */
+.status {
+    margin-bottom: 30px;
+    padding: 15px;
+    border: 2px solid #222;
+    border-radius: 12px;
+    background: #111;
+    display: inline-block;
+    min-width: 300px;
+}
+
+.status p {
+    margin: 8px 0;
+    font-size: 1.2em;
+}
+
+.status span {
+    font-weight: bold;
+    color: #0f0;
+    text-shadow: 0 0 5px #0f0;
+}
+
+.status span.off {
+    color: #f00;
+    text-shadow: 0 0 5px #f00;
+}
+
+/* ---------------- Video Section ---------------- */
+.video {
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.video img {
+    border: 3px solid #333;
+    border-radius: 15px;
+    max-width: 90%;
+    height: auto;
+    box-shadow: 0 0 20px #ff0000;
+    transition: transform 0.3s ease;
+}
+
+.video img:hover {
+    transform: scale(1.02);
+}
+
+/* ---------------- Security Button ---------------- */
+#securityBtn {
+    margin: 15px;
+    padding: 12px 25px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(45deg, #ff0000, #ff5555);
+    color: #fff;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px #ff0000;
+}
+
+#securityBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px #ff5555;
+}
+
+/* ---------------- Alarm Modal ---------------- */
+#alarmModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    color: #ff0000;
+    font-size: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    flex-direction: column;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+#alarmModal p {
+    margin: 15px 0;
+    text-shadow: 0 0 20px #ff0000;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ---------------- Audio / Hidden Elements ---------------- */
+audio {
+    display: none;
+}
+
+/* ---------------- Responsive ---------------- */
+@media screen and (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+    .status {
+        min-width: 250px;
+        font-size: 0.9em;
+    }
+    #securityBtn {
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    #alarmModal {
+        font-size: 40px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    h1 {
+        font-size: 1.8em;
+    }
+    .status {
+        min-width: 200px;
+        font-size: 0.85em;
+    }
+    #securityBtn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    #alarmModal {
+        font-size: 30px;
+    }
+}
+
+/* ---------------- Minor Animations ---------------- */
+.status span.blink {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+/* ---------------- Shadow / Glow Effects ---------------- */
+#securityBtn:active {
+    box-shadow: 0 0 15px #ff0000 inset;
+}
+
+.video img.glow {
+    box-shadow: 0 0 25px #ff0000, 0 0 50px #ff0000;
+}
+
+</style>
+
+</head>
+<body>
+  <h1>Laser Detection Dashboard</h1>
+
+  <button id="securityBtn">Security Mode: OFF</button>
+
+  <div class="status">
+    <p>Status: <span id="status">Loading...</span></p>
+    <p>Position: <span id="pos">--</span></p>
+  </div>
+
+  <div class="video">
+    <img id="video" src="/video_feed" width="640" height="480">
+  </div>
+
+  <div id="alarmModal">
+    <p>ALERT! MOTION DETECTED!</p>
+    <p>Click anywhere or press any key to stop</p>
+  </div>
+
+  <audio id="alarmAudio" src="/static/alarm.mp3" loop></audio>
+
+<script>
+let securityMode = false;
+let lastStatus = "OFF";
+const securityBtn = document.getElementById("securityBtn");
+const statusEl = document.getElementById("status");
+const posEl = document.getElementById("pos");
+const alarmModal = document.getElementById("alarmModal");
+const alarmAudio = document.getElementById("alarmAudio");
+
+// Unlock audio after first user click anywhere
+document.body.addEventListener("click", () => {
+    alarmAudio.play().then(() => alarmAudio.pause());
+}, { once: true });
+
+// Toggle Security Mode
+securityBtn.addEventListener("click", () => {
+  securityMode = !securityMode;
+  securityBtn.textContent = "Security Mode: " + (securityMode ? "ON" : "OFF");
+});
+
+// Stop alarm on any key press OR any click
+function stopAlarm() {
+  if (!alarmModal.style.display.includes("none")) {
+    alarmAudio.pause();
+    alarmAudio.currentTime = 0;
+    alarmModal.style.display = "none";
+  }
+}
+document.addEventListener("keydown", stopAlarm);
+document.body.addEventListener("click", stopAlarm);
+
+// Debounce / persistence variables
+let laserOffTimer = null;
+const OFF_THRESHOLD = 50; // ms laser must stay OFF before alarm triggers (super sensitive)
+
+// Poll status every 50ms for maximum responsiveness
+setInterval(async () => {
+  try {
+    const res = await fetch('/api/laser_status');
+    const data = await res.json();
+    const currStatus = data.laser_status;
+    const position = data.position;
+
+    statusEl.textContent = currStatus;
+    posEl.textContent = position || "--";
+
+    if (securityMode) {
+      if (lastStatus === "ON" && currStatus === "OFF") {
+        if (!laserOffTimer) {
+          // trigger alarm very quickly after minimal OFF
+          laserOffTimer = setTimeout(() => {
+            alarmModal.style.display = "flex";
+            alarmAudio.play();
+          }, OFF_THRESHOLD);
+        }
+      } else if (currStatus === "ON") {
+        // cancel pending alarm immediately if laser back ON
+        if (laserOffTimer) {
+          clearTimeout(laserOffTimer);
+          laserOffTimer = null;
+        }
+      }
+    }
+
+    lastStatus = currStatus;
+  } catch (err) {
+    console.error("Failed to fetch laser status:", err);
+  }
+}, 50); // poll every 50ms
+
+</script>
+
+</body>
+</html>
