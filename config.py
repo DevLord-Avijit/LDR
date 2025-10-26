@@ -1,4 +1,4 @@
-CAMERA_INDEX = 2
+CAMERA_INDEX = 0 #default port for webcam
 RED_LOWER = (0, 120, 120)
 RED_UPPER = (10, 255, 255)
 RADIUS_TOLERANCE = 5
