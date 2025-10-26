@@ -235,9 +235,9 @@ document.body.addEventListener("click", stopAlarm);
 
 // Debounce / persistence variables
 let laserOffTimer = null;
-const OFF_THRESHOLD = 50; // ms laser must stay OFF before alarm triggers (super sensitive)
+const OFF_THRESHOLD = 20; // ms laser must stay OFF before alarm triggers (super sensitive)
 
-// Poll status every 50ms for maximum responsiveness
+// Poll status every 20ms for maximum responsiveness
 setInterval(async () => {
   try {
     const res = await fetch('/api/laser_status');
@@ -270,7 +270,7 @@ setInterval(async () => {
   } catch (err) {
     console.error("Failed to fetch laser status:", err);
   }
-}, 50); // poll every 50ms
+}, 20); // poll every 20ms
 
 </script>
 
