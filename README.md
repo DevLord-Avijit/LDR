@@ -95,7 +95,7 @@ No Arduino, Raspberry Pi, or external sensors are required.
 5. Access dashboard:
 
     ```
-    http://<your-ip>:5000
+    http://127.0.0.1:5000
     ```
 
 Activate **Security Mode** to trigger alarms on any laser interruption.
